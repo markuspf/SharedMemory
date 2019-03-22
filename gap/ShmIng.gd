@@ -14,6 +14,8 @@
 #! This section will describe the example
 #! methods of ShmIng
 
-#! @Description
-#!   Insert documentation for your function here
-DeclareGlobalFunction( "ShmIng_Example" );
+#!
+DeclareCategory("IsSharedMemoryRegion", IsObject);
+BindGlobal("SHMING_Region_Family", NewFamily("SHMING_Region_Family"));
+BindGlobal("SHMING_Region_Type",
+           NewType(SHMING_Region_Family, IsSharedMemoryRegion));
