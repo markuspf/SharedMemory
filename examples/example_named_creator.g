@@ -14,10 +14,8 @@ SHARED_MEMORY_POKE_STRING(region, 4, msg);
 
 counter := 0;
 while true do
-  Sleep(1);
   Print("counter is: ", counter, "\n");
-  SHARED_MEMORY_POKE\<Char\>(region, 1024, counter);
-  pp := SHARED_MEMORY_PEEK\<Char\>(region, 1024);
-  Print("pp: ", pp, "\n");
+  SHARED_MEMORY_POKE\<UInt4\>(region, 1024, counter);
   counter := counter + 1;
+  MicroSleep(500000);
 od; 

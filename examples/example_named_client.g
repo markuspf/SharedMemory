@@ -16,7 +16,7 @@ Print(" retrieved message: ", rmsg, "\n");
 
 Print("polling counter: \n");
 while true do
-  Sleep(5);
-  rcounter := SHARED_MEMORY_PEEK\<Char\>(region, 1024);
+  MicroSleep(1000000);
+  rcounter := SHARED_MEMORY_PEEK\<UInt4\>(region, 1024);
   Print(rcounter, " \c");
 od; 
