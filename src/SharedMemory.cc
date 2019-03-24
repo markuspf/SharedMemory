@@ -7,6 +7,7 @@ extern "C" {
 #include <fcntl.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <time.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -159,7 +160,7 @@ Obj FuncSHARED_MEMORY_SEMINIT(Obj self, Obj region, Obj pos, Obj val)
     UInt8 upos = UInt8_ObjInt(pos);
     unsigned int uval = (unsigned int)UInt_ObjInt(val);
 
-    return ObjInt_UInt(sem_init((sem_t *)&mem[upos], 1, uval));
+    return ObjInt_Int(sem_init((sem_t *)&mem[upos], 1, uval));
 }
 
 Obj FuncSHARED_MEMORY_SEMPOST(Obj self, Obj region, Obj pos)
@@ -169,7 +170,7 @@ Obj FuncSHARED_MEMORY_SEMPOST(Obj self, Obj region, Obj pos)
     char *mem = SHAREDMEMORY_REGION(region)->data;
     UInt8 upos = UInt8_ObjInt(pos);
 
-    return ObjInt_UInt(sem_post((sem_t *)&mem[upos]));
+    return ObjInt_Int(sem_post((sem_t *)&mem[upos]));
 }
 
 Obj FuncSHARED_MEMORY_SEMWAIT(Obj self, Obj region, Obj pos)
@@ -179,7 +180,7 @@ Obj FuncSHARED_MEMORY_SEMWAIT(Obj self, Obj region, Obj pos)
     char *mem = SHAREDMEMORY_REGION(region)->data;
     UInt8 upos = UInt8_ObjInt(pos);
 
-    return ObjInt_UInt(sem_wait((sem_t *)&mem[upos]));
+    return ObjInt_Int(sem_wait((sem_t *)&mem[upos]));
 }
 
 Obj FuncSHARED_MEMORY_SEMTRYWAIT(Obj self, Obj region, Obj pos)
@@ -189,9 +190,28 @@ Obj FuncSHARED_MEMORY_SEMTRYWAIT(Obj self, Obj region, Obj pos)
     char *mem = SHAREDMEMORY_REGION(region)->data;
     UInt8 upos = UInt8_ObjInt(pos);
 
-    return ObjInt_UInt(sem_trywait((sem_t *)&mem[upos]));
+    return ObjInt_Int(sem_trywait((sem_t *)&mem[upos]));
 }
 
+Obj FuncSHARED_MEMORY_SEMTIMEDWAIT(Obj self, Obj region, Obj pos, Obj timeout)
+{
+    RequireSmallInt("SHARED_MEMORY_SEMTRYWAIT", pos, "pos");
+
+    char *mem = SHAREDMEMORY_REGION(region)->data;
+    UInt8 upos = UInt8_ObjInt(pos);
+    UInt8 utimeout = UInt8_ObjInt(timeout);
+
+    struct timespec ts;
+
+    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
+        return ObjInt_Int(-1);
+    }
+    // microseconds should be enough for everyone
+    ts.tv_sec += utimeout / 1000000;
+    ts.tv_nsec += (utimeout % 1000000) * 1000;
+
+    return ObjInt_Int(sem_timedwait((sem_t *)&mem[upos], &ts));
+}
 
 // Table of functions to export
 static StructGVarFunc GVarFuncs[] = {
@@ -213,6 +233,7 @@ static StructGVarFunc GVarFuncs[] = {
     GVAR_FUNC(SHARED_MEMORY_SEMPOST, 2, "shm, pos"),
     GVAR_FUNC(SHARED_MEMORY_SEMWAIT, 2, "shm, pos"),
     GVAR_FUNC(SHARED_MEMORY_SEMTRYWAIT, 2, "shm, pos"),
+    GVAR_FUNC(SHARED_MEMORY_SEMTIMEDWAIT, 3, "shm, pos, timeout"),
 
     { 0 } /* Finish with an empty entry */
 };
