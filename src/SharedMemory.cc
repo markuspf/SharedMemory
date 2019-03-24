@@ -6,6 +6,7 @@ extern "C" {
 #include "src/compiled.h"          /* GAP headers */
 #include <fcntl.h>
 #include <unistd.h>
+#include <semaphore.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -149,6 +150,49 @@ Obj FuncSHARED_MEMORY_POKE_STRING(Obj self, Obj region, Obj pos, Obj val)
     return 0;
 }
 
+Obj FuncSHARED_MEMORY_SEMINIT(Obj self, Obj region, Obj pos, Obj val)
+{
+    RequireSmallInt("SHARED_MEMORY_SEMINIT", pos, "pos");
+    RequireSmallInt("SHARED_MEMORY_SEMINIT", val, "val");
+
+    char *mem = SHAREDMEMORY_REGION(region)->data;
+    UInt8 upos = UInt8_ObjInt(pos);
+    unsigned int uval = (unsigned int)UInt_ObjInt(val);
+
+    return ObjInt_UInt(sem_init((sem_t *)&mem[upos], 1, uval));
+}
+
+Obj FuncSHARED_MEMORY_SEMPOST(Obj self, Obj region, Obj pos)
+{
+    RequireSmallInt("SHARED_MEMORY_SEMPOST", pos, "pos");
+
+    char *mem = SHAREDMEMORY_REGION(region)->data;
+    UInt8 upos = UInt8_ObjInt(pos);
+
+    return ObjInt_UInt(sem_post((sem_t *)&mem[upos]));
+}
+
+Obj FuncSHARED_MEMORY_SEMWAIT(Obj self, Obj region, Obj pos)
+{
+    RequireSmallInt("SHARED_MEMORY_SEMWAIT", pos, "pos");
+
+    char *mem = SHAREDMEMORY_REGION(region)->data;
+    UInt8 upos = UInt8_ObjInt(pos);
+
+    return ObjInt_UInt(sem_wait((sem_t *)&mem[upos]));
+}
+
+Obj FuncSHARED_MEMORY_SEMTRYWAIT(Obj self, Obj region, Obj pos)
+{
+    RequireSmallInt("SHARED_MEMORY_SEMTRYWAIT", pos, "pos");
+
+    char *mem = SHAREDMEMORY_REGION(region)->data;
+    UInt8 upos = UInt8_ObjInt(pos);
+
+    return ObjInt_UInt(sem_trywait((sem_t *)&mem[upos]));
+}
+
+
 // Table of functions to export
 static StructGVarFunc GVarFuncs[] = {
     GVAR_FUNC(SHARED_MEMORY_SHMOPEN, 2, "name, oflags"),
@@ -165,6 +209,11 @@ static StructGVarFunc GVarFuncs[] = {
     GVAR_FUNC(SHARED_MEMORY_POKE<UInt8>, 3, "shm, pos, val"),
     GVAR_FUNC(SHARED_MEMORY_PEEK_STRING, 3, "shm, pos, length"),
     GVAR_FUNC(SHARED_MEMORY_POKE_STRING, 3, "shm, pos, string"),
+    GVAR_FUNC(SHARED_MEMORY_SEMINIT, 3, "shm, pos, val"),
+    GVAR_FUNC(SHARED_MEMORY_SEMPOST, 2, "shm, pos"),
+    GVAR_FUNC(SHARED_MEMORY_SEMWAIT, 2, "shm, pos"),
+    GVAR_FUNC(SHARED_MEMORY_SEMTRYWAIT, 2, "shm, pos"),
+
     { 0 } /* Finish with an empty entry */
 };
 

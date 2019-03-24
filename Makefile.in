@@ -10,7 +10,7 @@ MODULE_NAME = SharedMemory
 
 SOURCES = src/SharedMemory.cc
 
-EXTRA_LDFLAGS = -lrt
+EXTRA_LDFLAGS = -lrt -lpthread
 
 ########################################################################
 # Do not edit below unless you know what you're doing
