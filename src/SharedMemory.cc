@@ -45,10 +45,6 @@ Obj FuncSHARED_MEMORY_SHMOPEN(Obj self, Obj name, Obj oflag)
     // TODO: allow mode to be passed?
     int fd = shm_open(CSTR_STRING(name), moflag, 0600);
 
-    // TODO: Error handling, could be done using errno
-    if (fd == -1) {
-       fprintf(stderr, "errno: %d\n", errno);
-    }
     return INTOBJ_INT(fd);
 }
 
@@ -106,10 +102,10 @@ Obj FuncSHARED_MEMORY_PEEK(Obj self, Obj region, Obj pos)
 {
     RequireSmallInt("SHARED_MEMORY_PEEK", pos, "pos");
 
-    T *mem = (T *)SHAREDMEMORY_REGION(region)->data;
     UInt8 upos = UInt8_ObjInt(pos);
+    T val = *((T *)(&(SHAREDMEMORY_REGION(region)->data[upos])));
 
-    return ObjInt_UInt8((UInt8)(mem[upos]));
+    return ObjInt_UInt8((UInt8)(val));
 }
 
 template <typename T> 
@@ -118,9 +114,9 @@ Obj FuncSHARED_MEMORY_POKE(Obj self, Obj region, Obj pos, Obj val)
     RequireSmallInt("SHARED_MEMORY_POKE", pos, "pos");
 
     UInt8 upos = UInt8_ObjInt(pos);
-    T uval = (T)(UInt_ObjInt(val));
+    T uval = (T)(UInt8_ObjInt(val));
 
-    *(T *)(&SHAREDMEMORY_REGION(region)->data[upos]) = uval;
+    *(T *)(&(SHAREDMEMORY_REGION(region)->data[upos])) = (T)(uval);
 
     return 0;
 }
