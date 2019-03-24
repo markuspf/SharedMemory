@@ -11,6 +11,7 @@ static Obj SHAREDMEMORY_Region_Type;
 
 struct ShmRegion {
     Obj    type;
+    int    fd;
     size_t size;
     char   *data;
 };
@@ -26,21 +27,46 @@ static ConstShmRegionPtr CONST_SHAREDMEMORY_REGION(Obj region) {
     return (ConstShmRegionPtr)CONST_ADDR_OBJ(region);
 }
 
-Obj FuncMMAP_SHARED_MEMORY(Obj self, Obj size)
+Obj FuncSHARED_MEMORY_SHMOPEN(Obj self, Obj name, Obj oflag)
 {
-    RequireSmallInt("MMAP_SHARED_MEMORY", size, "size");
+    RequireStringRep("SHARED_MEMORY_SHMOPEN", name);
+    RequireSmallInt("SHARED_MEMORY_SHMOPEN", oflag, "oflag");
 
-    size_t sz;
-    Obj result;
+    int moflag = INT_INTOBJ(oflag);
 
-    sz = INT_INTOBJ(size);
+    // TODO: allow mode to be passed?
+    int fd = shm_open(CSTR_STRING(name), moflag, 0600);
 
-    result = NewBag(T_DATOBJ, sizeof(struct ShmRegion));
+    // TODO: Error handling
+
+    return INTOBJ_INT(fd);
+}
+
+Obj FuncSHARED_MEMORY_SHMUNLINK(Obj self, Obj name)
+{
+    RequireStringRep("SHARED_MEMORY_SHMOPEN", name);
+
+    // TODO: allow mode to be passed?
+    int fd = shm_unlink(CSTR_STRING(name));
+
+    return 0;
+}
+
+Obj FuncSHARED_MEMORY_MMAP(Obj self, Obj ifd, Obj isize)
+{
+    RequireSmallInt("MMAP_SHARED_MEMORY", ifd, "fd");
+    RequireSmallInt("MMAP_SHARED_MEMORY", isize, "size");
+
+    size_t sz = INT_INTOBJ(isize);
+    int fd = INT_INTOBJ(ifd);
+
+    Obj result = NewBag(T_DATOBJ, sizeof(struct ShmRegion));
     SetTypeDatObj(result, SHAREDMEMORY_Region_Type);
 
     SHAREDMEMORY_REGION(result)->size = sz;
-    SHAREDMEMORY_REGION(result)->data = (char *)mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED,
-               -1, 0);
+    SHAREDMEMORY_REGION(result)->fd = fd;
+    SHAREDMEMORY_REGION(result)->data = (char *)mmap(
+        NULL, sz, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, fd, 0);
     CHANGED_BAG(result);
 
     return result;
@@ -98,7 +124,9 @@ Obj FuncSHARED_MEMORY_POKE_STRING(Obj self, Obj region, Obj pos, Obj val)
 
 // Table of functions to export
 static StructGVarFunc GVarFuncs[] = {
-    GVAR_FUNC(MMAP_SHARED_MEMORY, 1, "size"),
+    GVAR_FUNC(SHARED_MEMORY_SHMOPEN, 2, "name, oflags"),
+    GVAR_FUNC(SHARED_MEMORY_SHMUNLINK, 1, "name"),
+    GVAR_FUNC(SHARED_MEMORY_MMAP, 2, "size, fd"),
     GVAR_FUNC(SHARED_MEMORY_PEEK<Char>, 2, "shm, pos"),
     GVAR_FUNC(SHARED_MEMORY_PEEK<UInt2>, 2, "shm, pos"),
     GVAR_FUNC(SHARED_MEMORY_PEEK<UInt4>, 2, "shm, pos"),
