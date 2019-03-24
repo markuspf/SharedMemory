@@ -18,9 +18,9 @@ o := MMAP_SHARED_MEMORY(1024 * 1024);
 pid := IO_fork();
 if pid <> 0 then
   # Store the length of the string in the shared memory array
-  SHARED_MEMORY_POKE1(o, 0, Length(message));
+  SHARED_MEMORY_POKE\<UInt4\>(o, 0, Length(message));
   # Store a message in the shared memory array
-  SHARED_MEMORY_POKE_STRING(o, 1, message);
+  SHARED_MEMORY_POKE_STRING(o, 4, message);
   # dump some other junk in it
   for i in [50..60] do
     SHARED_MEMORY_POKE\<Char\>(o, i, i);
@@ -30,9 +30,9 @@ if pid <> 0 then
 else
   # Make sure messages have arrived
   Sleep(5);
-  len := SHARED_MEMORY_PEEK\<Char\>(o, 0);
+  len := SHARED_MEMORY_PEEK\<UInt4\>(o, 0);
   Print("Message has length ", len, "\n");
-  mem := SHARED_MEMORY_PEEK_STRING(o, 0, len);
+  mem := SHARED_MEMORY_PEEK_STRING(o, 4, len);
   Print("message ", mem, "\c\n");
   for i in [50..60] do
     mem := SHARED_MEMORY_PEEK1(o, i);
