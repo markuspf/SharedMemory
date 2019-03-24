@@ -10,6 +10,8 @@ MODULE_NAME = SharedMemory
 
 SOURCES = src/SharedMemory.cc
 
+EXTRA_LDFLAGS = -lrt
+
 ########################################################################
 # Do not edit below unless you know what you're doing
 ########################################################################
@@ -86,7 +88,7 @@ gen/%.lo: %.cc
 # build rule for linking all object files together into a kernel extension
 $(GAPINSTALLIB): $(OBJS)
 	@$(MKDIR_P) $(BINARCHDIR)
-	@$(QUIET_GAC)$(GAC) -d -p "$(DEPFLAGS)" $(OBJS) -o $@
+	@$(QUIET_GAC)$(GAC) -d -p "$(DEPFLAGS)" $(OBJS) -L "$(EXTRA_LDFLAGS)" -o $@
 
 clean:
 	rm -rf $(BINARCHDIR)

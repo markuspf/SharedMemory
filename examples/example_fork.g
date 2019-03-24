@@ -13,7 +13,7 @@ message := "Hello, world!";
 # 
 # If the current process is forked (using IO_fork for example), this
 # memory mapping is inherited by child processes who can subsequently
-# read from and write to it: All descendand processes share this bit
+# read from and write to it: All descended processes share this bit
 # of memory. 
 o := SHARED_MEMORY_MMAP(-1, 1024 * 1024);
 
