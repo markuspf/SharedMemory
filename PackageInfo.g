@@ -1,5 +1,5 @@
 #
-# ShmIng: Shared Memory Parallelism in GAP
+# SharedMemory: Shared Memory Parallelism in GAP
 #
 # This file contains package meta data. For additional information on
 # the meaning and correct usage of these fields, please consult the
@@ -8,11 +8,11 @@
 #
 SetPackageInfo( rec(
 
-PackageName := "ShmIng",
+PackageName := "SharedMemory",
 Subtitle := "Shared Memory Parallelism in GAP",
 Version := "0.1",
 Date := "22/03/2019", # dd/mm/yyyy format
-License := "GPL-2.0-or-later",
+License := "BSD",
 
 Persons := [
   rec(
@@ -35,10 +35,10 @@ Persons := [
 
 SourceRepository := rec(
     Type := "git",
-    URL := "https://github.com/markuspf/ShmIng",
+    URL := "https://github.com/markuspf/SharedMemory",
 ),
 IssueTrackerURL := Concatenation( ~.SourceRepository.URL, "/issues" ),
-PackageWWWHome  := "https://markuspf.github.io/ShmIng/",
+PackageWWWHome  := "https://markuspf.github.io/SharedMemory/",
 PackageInfoURL  := Concatenation( ~.PackageWWWHome, "PackageInfo.g" ),
 README_URL      := Concatenation( ~.PackageWWWHome, "README.md" ),
 ArchiveURL      := Concatenation( ~.SourceRepository.URL,
@@ -60,7 +60,7 @@ Status := "dev",
 AbstractHTML   :=  "",
 
 PackageDoc := rec(
-  BookName  := "ShmIng",
+  BookName  := "SharedMemory",
   ArchiveURLSubset := ["doc"],
   HTMLStart := "doc/chap0.html",
   PDFFile   := "doc/manual.pdf",
@@ -70,18 +70,18 @@ PackageDoc := rec(
 
 Dependencies := rec(
   GAP := ">= 4.9",
-  NeededOtherPackages := [ ],
+  NeededOtherPackages := [ ["io", ">= 4.5.4" ] ],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
 ),
 
 AvailabilityTest := function()
   local dir, lib;
-  dir := DirectoriesPackagePrograms("ShmIng");
-  lib := Filename(dir, "ShmIng.so");
+  dir := DirectoriesPackagePrograms("SharedMemory");
+  lib := Filename(dir, "SharedMemory.so");
   if lib = fail then
     LogPackageLoadingMessage(PACKAGE_WARNING,
-                             "failed to load kernel module of package ShmIng");
+                             "failed to load kernel module of package SharedMemory");
     return fail;
   fi;
   return true;

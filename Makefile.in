@@ -1,14 +1,14 @@
 #
-# Makefile rules for the ShmIng package
+# Makefile rules for the SharedMemory package
 #
 # This requires GNU make (just as the main GAP does).
 #
 # For simple packages one should only need to modify the MODULE_NAME
 # and the SOURCES variable.
 #
-MODULE_NAME = ShmIng
+MODULE_NAME = SharedMemory
 
-SOURCES = src/ShmIng.c
+SOURCES = src/SharedMemory.cc
 
 ########################################################################
 # Do not edit below unless you know what you're doing

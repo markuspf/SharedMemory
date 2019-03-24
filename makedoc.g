@@ -1,5 +1,5 @@
 #
-# ShmIng: Shared Memory Parallelism in GAP
+# SharedMemory: Shared Memory Parallelism in GAP
 #
 # This file is a script which compiles the package manual.
 #
